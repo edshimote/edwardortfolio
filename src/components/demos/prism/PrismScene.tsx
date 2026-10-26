@@ -22,9 +22,10 @@ function Controls({ resetToken, paused }: { resetToken: number; paused: boolean 
     c.enablePan = false;
     c.minDistance = 3;
     c.maxDistance = 9;
-    c.addEventListener("change", invalidate);
+    const onChange = () => invalidate();
+    c.addEventListener("change", onChange);
     controls.current = c;
-    return () => { c.dispose(); controls.current = null; };
+    return () => { c.removeEventListener("change", onChange); c.dispose(); controls.current = null; };
   }, [camera, gl, invalidate]);
 
   useEffect(() => {

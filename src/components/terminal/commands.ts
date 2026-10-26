@@ -52,9 +52,9 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
           h(OutList, { items: tt.items.map((it) => h(Fragment, null, h("span", { className: "text-ink" }, it.cmd), h("span", { className: "text-ink-muted" }, "  — " + it.desc))) }),
-          h(OutLine, { variant: "muted" }, tt.tip),
+          h(OutLine, { variant: "muted" , children: tt.tip }),
         ),
       };
     }
@@ -64,8 +64,8 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
-          ...tt.lines.map((l) => h(OutLine, { key: l }, l)),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
+          ...tt.lines.map((l) => h(OutLine, { key: l , children: l })),
         ),
       };
     }
@@ -75,8 +75,8 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
-          ...tt.lines.map((l) => h(OutLine, { key: l, variant: "muted" }, l)),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
+          ...tt.lines.map((l) => h(OutLine, { key: l, variant: "muted" , children: l })),
         ),
       };
     }
@@ -86,10 +86,10 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
           ...tt.categories.map((cat) =>
             h(Fragment, { key: cat.title },
-              h(OutLine, null, cat.title + ":"),
+              h(OutLine, { children: cat.title + ":" }),
               h(OutList, { items: cat.items.map((i) => h("span", { key: i, className: "text-ink-muted" }, i)) }),
             ),
           ),
@@ -102,7 +102,7 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
           h(OutList, {
             items: CONCEPTS.map((c) => {
               const r = resolveProject(c, t, locale);
@@ -120,21 +120,21 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
               );
             }),
           }),
-          h(OutLine, { variant: "muted" }, tt.hint),
+          h(OutLine, { variant: "muted" , children: tt.hint }),
         ),
       };
     }
 
     case "open": {
       const tt = t.terminal.open;
-      if (!arg) return { kind: "output", node: h(OutLine, { variant: "muted" }, tt.usage) };
+      if (!arg) return { kind: "output", node: h(OutLine, { variant: "muted" , children: tt.usage }) };
       const project = findProject(arg, locale);
-      if (!project) return { kind: "output", node: h(OutLine, { variant: "error" }, tt.notFound) };
+      if (!project) return { kind: "output", node: h(OutLine, { variant: "error" , children: tt.notFound }) };
       const href = projectHref(project);
-      if (!href) return { kind: "output", node: h(OutLine, { variant: "muted" }, tt.comingSoon) };
+      if (!href) return { kind: "output", node: h(OutLine, { variant: "muted" , children: tt.comingSoon }) };
       ctx.openProject(href);
       const r = resolveProject(project, t, locale);
-      return { kind: "output", node: h(OutLine, { variant: "success" }, `${tt.opening} ${r.title} → ${href}`) };
+      return { kind: "output", node: h(OutLine, { variant: "success" , children: `${tt.opening} ${r.title} → ${href}` }) };
     }
 
     case "services": {
@@ -144,11 +144,11 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
           h(OutList, {
             items: Object.values(cards).map((c) => h(Fragment, { key: c.title }, h("span", { className: "text-ink" }, c.title), h("span", { className: "text-ink-muted" }, " — " + c.desc))),
           }),
-          h(OutLine, { variant: "muted" }, tt.cta),
+          h(OutLine, { variant: "muted" , children: tt.cta }),
         ),
       };
     }
@@ -157,14 +157,14 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       const tt = t.terminal.contact;
       ctx.scrollTo("contact");
       if (!CONTACT.email) {
-        return { kind: "output", node: h(OutLine, { variant: "muted" }, tt.unconfigured) };
+        return { kind: "output", node: h(OutLine, { variant: "muted" , children: tt.unconfigured }) };
       }
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "accent" }, tt.intro),
+          h(OutLine, { variant: "accent" , children: tt.intro }),
           CONTACT.email ? h(OutRow, { label: tt.email, value: h("a", { href: contactHref, className: "underline underline-offset-2 hover:text-[var(--term-accent2)]" }, CONTACT.email) }) : null,
-          h(OutLine, { variant: "muted" }, tt.cta),
+          h(OutLine, { variant: "muted" , children: tt.cta }),
         ),
       };
     }
@@ -175,18 +175,18 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
 
     case "theme": {
       const next = ctx.cycleTheme();
-      return { kind: "output", node: h(OutLine, { variant: "success" }, `${t.terminal.theme.switched} ${t.terminal.theme.names[next]}`) };
+      return { kind: "output", node: h(OutLine, { variant: "success" , children: `${t.terminal.theme.switched} ${t.terminal.theme.names[next]}` }) };
     }
 
     case "date": {
       const now = new Date();
       const formatted = now.toLocaleString(locale === "pt" ? "pt-BR" : "en-US", { dateStyle: "full", timeStyle: "short" });
-      return { kind: "output", node: h(OutLine, null, formatted) };
+      return { kind: "output", node: h(OutLine, { children: formatted }) };
     }
 
     case "echo": {
-      if (!arg) return { kind: "output", node: h(OutLine, { variant: "muted" }, t.terminal.echo.usage) };
-      return { kind: "output", node: h(OutLine, null, arg) };
+      if (!arg) return { kind: "output", node: h(OutLine, { variant: "muted" , children: t.terminal.echo.usage }) };
+      return { kind: "output", node: h(OutLine, { children: arg }) };
     }
 
     case "demo": {
@@ -194,7 +194,7 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
     }
 
     case "sudo": {
-      return { kind: "output", node: h(OutLine, { variant: "muted" }, t.terminal.easterEgg) };
+      return { kind: "output", node: h(OutLine, { variant: "muted" , children: t.terminal.easterEgg }) };
     }
 
     default: {
@@ -202,8 +202,8 @@ export function runCommand(raw: string, ctx: TerminalCtx): RunResult {
       return {
         kind: "output",
         node: h(OutBlock, null,
-          h(OutLine, { variant: "error" }, `${tt.prefix} ${cmd}`),
-          h(OutLine, { variant: "muted" }, tt.suggestion),
+          h(OutLine, { variant: "error" , children: `${tt.prefix} ${cmd}` }),
+          h(OutLine, { variant: "muted" , children: tt.suggestion }),
         ),
       };
     }
