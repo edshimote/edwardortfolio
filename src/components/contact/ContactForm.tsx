@@ -7,7 +7,7 @@ import {
   CONTACT,
   contactHref,
 } from "@/lib/contact";
-import { catalogSnapshot,money,PROJECT_COMPLEXITIES,PROJECT_TIMELINES,PROJECT_FEATURES,type Selection } from "@/lib/commercial-catalog";
+import { catalogSnapshot,money,currencyFor,PROJECT_COMPLEXITIES,PROJECT_TIMELINES,PROJECT_FEATURES,PROJECT_COMPLEXITIES_EN,PROJECT_TIMELINES_EN,PROJECT_FEATURES_EN,type Selection,type Market } from "@/lib/commercial-catalog";
 import { ContactButtons } from "./ContactButtons";
 
 type Status = "idle" | "submitting" | "success" | "error" | "unconfigured";
@@ -16,7 +16,7 @@ type Errors = Partial<Record<"name" | "email" | "message", string>>;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=>void}) {
-  const { t } = useLanguage();
+  const { t,locale } = useLanguage();const en=locale==="en";const market:Market=en?"US":"BR";const tr=(pt:string,eng:string)=>en?eng:pt;const price=(n:number)=>money(n,currencyFor(market));
   const f = t.contact.form;
 
   const [name, setName] = useState("");
@@ -25,8 +25,9 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
   const [phone, setPhone] = useState("");
   const [account, setAccount] = useState("");
   useEffect(() => { fetch("/api/session", {cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(d?.email){setAccount(d.email);setEmail(d.email);}}).catch(()=>{}); }, []);
-  const snapshot=catalogSnapshot(selection);
+  const snapshot=catalogSnapshot(selection,true,market);
   const [budget, setBudget] = useState("");
+  useEffect(()=>{setBudget("");},[market]);
   const [complexity,setComplexity]=useState("");
   const [timeline,setTimeline]=useState("");
   const [features,setFeatures]=useState<string[]>([]);
@@ -48,8 +49,8 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!account) { setStatus("error"); setErrorDetail("Entre na sua conta para enviar e acompanhar o orçamento."); return; }
-    if(!snapshot){setStatus("error");setErrorDetail("Selecione pelo menos um serviço no catálogo e responda à manutenção de cada site.");return;}
+    if (!account) { setStatus("error"); setErrorDetail(tr("Entre na sua conta para enviar e acompanhar o orçamento.","Sign in to submit and track your quote.")); return; }
+    if(!snapshot){setStatus("error");setErrorDetail(tr("Selecione pelo menos um serviço no catálogo e responda à manutenção de cada site.","Select at least one service and choose maintenance for each website."));return;}
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -73,6 +74,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
           email,
           company,
           phone,
+          market,
           service:"Catálogo comercial",
           catalogSelections:selection,
           catalogPreferences:{complexity:complexity||null,timeline:timeline||null,features},
@@ -81,7 +83,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
           company_website: honeypot,
         }),
       });
-      if (res.status === 401) { setStatus("error"); setErrorDetail("Sessão expirada. Entre novamente na área do cliente."); return; }
+      if (res.status === 401) { setStatus("error"); setErrorDetail(tr("Sessão expirada. Entre novamente na área do cliente.","Session expired. Sign in again.")); return; }
       if (res.status === 503) {
         setStatus("unconfigured");
         return;
@@ -132,17 +134,17 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
     return (
       <div className="glass flex items-start gap-3 rounded-2xl p-6 sm:p-8" role="status">
         <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-emerald-400" aria-hidden />
-        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">Abrir meu chat e acompanhar pedido</a><button type="button" className="mt-2 block text-sm underline" onClick={()=>setStatus("idle")}>Fazer novo pedido</button></div>
+        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">{tr("Abrir meu chat e acompanhar pedido","Open chat and track my request")}</a><button type="button" className="mt-2 block text-sm underline" onClick={()=>setStatus("idle")}>{tr("Fazer novo pedido","Start a new request")}</button></div>
       </div>
     );
   }
 
   return (
     <form id="catalog-contact-form" ref={formRef} onSubmit={onSubmit} noValidate className="glass relative rounded-2xl p-6 sm:p-8">
-      <h3 className="font-display text-lg font-semibold">2. Descreva seu projeto</h3>
-      <p className="mt-1.5 text-sm text-ink-muted">As escolhas do catálogo e a descrição serão enviadas automaticamente ao nosso chat.</p>
-      {snapshot?<div className="mt-4 rounded-xl border border-line p-3 text-sm"><p className="font-semibold">{snapshot.items.length} serviço(s) selecionado(s)</p><p>{money(snapshot.one_time_cents)} pagamento único + {money(snapshot.monthly_cents)}/mês</p></div>:<p className="mt-4 text-sm text-amber-300">Complete suas escolhas no catálogo antes de enviar.</p>}
-      {!account && <p className="mt-4 rounded-lg border border-line p-3 text-sm">Para enviar e acompanhar seu orçamento, <a className="text-secondary underline" href="/cliente">entre ou crie sua conta</a>.</p>}
+      <h3 className="font-display text-lg font-semibold">{tr("2. Descreva seu projeto","2. Tell us about your project")}</h3>
+      <p className="mt-1.5 text-sm text-ink-muted">{tr("As escolhas do catálogo e a descrição serão enviadas automaticamente ao nosso chat.","Your catalog selections and project description will be sent to our chat automatically.")}</p>
+      {snapshot?<div className="mt-4 rounded-xl border border-line p-3 text-sm"><p className="font-semibold">{snapshot.items.length} {tr("serviço(s) selecionado(s)","service(s) selected")}</p><p>{price(snapshot.one_time_cents)} {tr("pagamento único","one-time")} + {price(snapshot.monthly_cents)}{tr("/mês","/month")}</p></div>:<p className="mt-4 text-sm text-amber-300">{tr("Complete suas escolhas no catálogo antes de enviar.","Complete your catalog selections before submitting.")}</p>}
+      {!account && <p className="mt-4 rounded-lg border border-line p-3 text-sm">{tr("Para enviar e acompanhar seu orçamento, ","To submit and track your quote, ")}<a className="text-secondary underline" href="/cliente">{tr("entre ou crie sua conta","sign in or create an account")}</a>.</p>}
 
       {/* Honeypot — hidden from sighted users, never filled by humans */}
       <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
@@ -172,20 +174,20 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
           <input id="company" className={inputCls} value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor="phone" className={labelCls}>WhatsApp (opcional)</label>
-          <input id="phone" type="tel" autoComplete="tel" className={inputCls} value={phone} onChange={e=>setPhone(e.target.value)} maxLength={40} placeholder="(11) 99999-9999" />
+          <label htmlFor="phone" className={labelCls}>{tr("WhatsApp (opcional)","Phone / WhatsApp (optional)")}</label>
+          <input id="phone" type="tel" autoComplete="tel" className={inputCls} value={phone} onChange={e=>setPhone(e.target.value)} maxLength={40} placeholder={en?"+1 (555) 123-4567":"(11) 99999-9999"} />
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="budget" className={labelCls}>{f.budget}</label>
           <select id="budget" className={inputCls} value={budget} onChange={(e) => setBudget(e.target.value)}>
             <option value="">{f.budgetPlaceholder}</option>
-            {["Até R$ 500","R$ 501 a R$ 1.000","R$ 1.001 a R$ 2.000","R$ 2.001 a R$ 3.500","Acima de R$ 3.500","A definir"].map((b) => <option key={b} value={b}>{b}</option>)}
+            {(en?["Up to $300","$301–$600","$601–$1,000","$1,001–$2,500","Over $2,500","To be determined"]:["Até R$ 500","R$ 501 a R$ 1.000","R$ 1.001 a R$ 2.000","R$ 2.001 a R$ 3.500","Acima de R$ 3.500","A definir"]).map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
         </div>
 
-        <div><label htmlFor="complexity" className={labelCls}>Complexidade desejada (opcional)</label><select id="complexity" className={inputCls} value={complexity} onChange={e=>setComplexity(e.target.value)}><option value="">Selecione</option>{PROJECT_COMPLEXITIES.map(v=><option key={v}>{v}</option>)}</select></div>
-        <div><label htmlFor="timeline" className={labelCls}>Preferência de prazo (opcional)</label><select id="timeline" className={inputCls} value={timeline} onChange={e=>setTimeline(e.target.value)}><option value="">Selecione</option>{PROJECT_TIMELINES.map(v=><option key={v}>{v}</option>)}</select></div>
-        <fieldset className="space-y-3 rounded-xl border border-line p-4 sm:col-span-2"><legend className="text-sm font-semibold">Recursos desejados (opcional)</legend><p className="text-xs text-ink-muted">Indique o que você precisa. Recursos fora do escopo escolhido serão avaliados no orçamento; marcar aqui não adiciona preço automaticamente.</p><div className="grid gap-2 sm:grid-cols-2">{PROJECT_FEATURES.map(v=><label key={v} className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-violet-500" checked={features.includes(v)} onChange={()=>setFeatures(prev=>prev.includes(v)?prev.filter(x=>x!==v):[...prev,v])}/>{v}</label>)}</div></fieldset>
+        <div><label htmlFor="complexity" className={labelCls}>{tr("Complexidade desejada (opcional)","Project complexity (optional)")}</label><select id="complexity" className={inputCls} value={complexity} onChange={e=>setComplexity(e.target.value)}><option value="">{tr("Selecione","Select")}</option>{PROJECT_COMPLEXITIES.map((v,i)=><option key={v} value={v}>{en?PROJECT_COMPLEXITIES_EN[i]:v}</option>)}</select></div>
+        <div><label htmlFor="timeline" className={labelCls}>{tr("Preferência de prazo (opcional)","Preferred timeline (optional)")}</label><select id="timeline" className={inputCls} value={timeline} onChange={e=>setTimeline(e.target.value)}><option value="">{tr("Selecione","Select")}</option>{PROJECT_TIMELINES.map((v,i)=><option key={v} value={v}>{en?PROJECT_TIMELINES_EN[i]:v}</option>)}</select></div>
+        <fieldset className="space-y-3 rounded-xl border border-line p-4 sm:col-span-2"><legend className="text-sm font-semibold">{tr("Recursos desejados (opcional)","Requested features (optional)")}</legend><p className="text-xs text-ink-muted">{tr("Indique o que você precisa. Recursos fora do escopo escolhido serão avaliados no orçamento; marcar aqui não adiciona preço automaticamente.","Select the features you need. Anything outside the selected scope will be quoted separately; these choices do not automatically add a charge.")}</p><div className="grid gap-2 sm:grid-cols-2">{PROJECT_FEATURES.map((v,i)=><label key={v} className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-violet-500" checked={features.includes(v)} onChange={()=>setFeatures(prev=>prev.includes(v)?prev.filter(x=>x!==v):[...prev,v])}/>{en?PROJECT_FEATURES_EN[i]:v}</label>)}</div></fieldset>
         <div className="sm:col-span-2">
           <label htmlFor="message" className={labelCls}>{f.message}</label>
           <textarea id="message" rows={5} maxLength={4000} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)}
