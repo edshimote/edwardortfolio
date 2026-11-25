@@ -6,11 +6,8 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 import {
   CONTACT,
   contactHref,
-  ESTIMATOR_APPLY_EVENT,
-  SERVICE_IDS,
-  type EstimatorApplyDetail,
-  type ServiceId,
 } from "@/lib/contact";
+import { catalogSnapshot,money,type Selection } from "@/lib/commercial-catalog";
 import { ContactButtons } from "./ContactButtons";
 
 type Status = "idle" | "submitting" | "success" | "error" | "unconfigured";
@@ -18,7 +15,7 @@ type Errors = Partial<Record<"name" | "email" | "message", string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function ContactForm() {
+export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=>void}) {
   const { t } = useLanguage();
   const f = t.contact.form;
 
@@ -28,7 +25,7 @@ export function ContactForm() {
   const [phone, setPhone] = useState("");
   const [account, setAccount] = useState("");
   useEffect(() => { fetch("/api/session", {cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(d?.email){setAccount(d.email);setEmail(d.email);}}).catch(()=>{}); }, []);
-  const [service, setService] = useState<ServiceId | "">("");
+  const snapshot=catalogSnapshot(selection);
   const [budget, setBudget] = useState("");
   const [message, setMessage] = useState("");
   const [honeypot, setHoneypot] = useState("");
@@ -36,18 +33,6 @@ export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorDetail, setErrorDetail] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
-
-  // Prefill from the Project Estimator's "Request a Custom Quote" CTA without losing anything typed.
-  useEffect(() => {
-    const onApply = (e: Event) => {
-      const { service: svc, summary } = (e as CustomEvent<EstimatorApplyDetail>).detail;
-      setService(svc);
-      setMessage((prev) => (prev ? `${prev}\n\n${summary}` : summary));
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
-    window.addEventListener(ESTIMATOR_APPLY_EVENT, onApply);
-    return () => window.removeEventListener(ESTIMATOR_APPLY_EVENT, onApply);
-  }, []);
 
   function validate(): Errors {
     const next: Errors = {};
@@ -61,6 +46,7 @@ export function ContactForm() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!account) { setStatus("error"); setErrorDetail("Entre na sua conta para enviar e acompanhar o orçamento."); return; }
+    if(!snapshot){setStatus("error");setErrorDetail("Selecione pelo menos um serviço no catálogo e responda à manutenção de cada site.");return;}
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -84,7 +70,8 @@ export function ContactForm() {
           email,
           company,
           phone,
-          service,
+          service:"Catálogo comercial",
+          catalogSelections:selection,
           budget,
           message,
           company_website: honeypot,
@@ -105,8 +92,10 @@ export function ContactForm() {
         setErrorDetail(f.errorGeneric);
         return;
       }
+      await res.json();
+      onSent();
       setStatus("success");
-      setName(""); setEmail(account); setCompany(""); setPhone(""); setService(""); setBudget(""); setMessage("");
+      setName(""); setEmail(account); setCompany(""); setPhone(""); setBudget(""); setMessage("");
     } catch {
       setStatus("error");
       setErrorDetail(f.errorGeneric);
@@ -139,15 +128,16 @@ export function ContactForm() {
     return (
       <div className="glass flex items-start gap-3 rounded-2xl p-6 sm:p-8" role="status">
         <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-emerald-400" aria-hidden />
-        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">Acompanhar meu pedido</a></div>
+        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">Abrir meu chat e acompanhar pedido</a></div>
       </div>
     );
   }
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate className="glass relative rounded-2xl p-6 sm:p-8">
-      <h3 className="font-display text-lg font-semibold">{f.title}</h3>
-      <p className="mt-1.5 text-sm text-ink-muted">{f.subtitle}</p>
+    <form id="catalog-contact-form" ref={formRef} onSubmit={onSubmit} noValidate className="glass relative rounded-2xl p-6 sm:p-8">
+      <h3 className="font-display text-lg font-semibold">2. Descreva seu projeto</h3>
+      <p className="mt-1.5 text-sm text-ink-muted">As escolhas do catálogo e a descrição serão enviadas automaticamente ao nosso chat.</p>
+      {snapshot?<div className="mt-4 rounded-xl border border-line p-3 text-sm"><p className="font-semibold">{snapshot.items.length} serviço(s) selecionado(s)</p><p>{money(snapshot.one_time_cents)} pagamento único + {money(snapshot.monthly_cents)}/mês</p></div>:<p className="mt-4 text-sm text-amber-300">Complete suas escolhas no catálogo antes de enviar.</p>}
       {!account && <p className="mt-4 rounded-lg border border-line p-3 text-sm">Para enviar e acompanhar seu orçamento, <a className="text-secondary underline" href="/cliente">entre ou crie sua conta</a>.</p>}
 
       {/* Honeypot — hidden from sighted users, never filled by humans */}
@@ -177,16 +167,6 @@ export function ContactForm() {
           <label htmlFor="company" className={labelCls}>{f.company} <span className="text-ink-muted/60">{f.companyOptional}</span></label>
           <input id="company" className={inputCls} value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" />
         </div>
-        <div>
-          <label htmlFor="service" className={labelCls}>{f.service}</label>
-          <select id="service" className={inputCls} value={service} onChange={(e) => setService(e.target.value as ServiceId | "")}>
-            <option value="">{f.servicePlaceholder}</option>
-            {SERVICE_IDS.map((id) => (
-              <option key={id} value={id}>{t.services.cards[id].title}</option>
-            ))}
-          </select>
-        </div>
-
         <div className="sm:col-span-2">
           <label htmlFor="phone" className={labelCls}>WhatsApp (opcional)</label>
           <input id="phone" type="tel" autoComplete="tel" className={inputCls} value={phone} onChange={e=>setPhone(e.target.value)} maxLength={40} placeholder="(11) 99999-9999" />
@@ -201,7 +181,7 @@ export function ContactForm() {
 
         <div className="sm:col-span-2">
           <label htmlFor="message" className={labelCls}>{f.message}</label>
-          <textarea id="message" rows={5} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)}
+          <textarea id="message" rows={5} maxLength={4000} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)}
             placeholder={f.messagePlaceholder} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-error" : undefined} />
           {errors.message && <p id="message-error" className={errorCls}>{errors.message}</p>}
         </div>
@@ -217,7 +197,7 @@ export function ContactForm() {
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="submit"
-          disabled={status === "submitting"}
+          disabled={status === "submitting" || !snapshot}
           className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-7 text-[0.95rem] font-medium text-white transition-all duration-300 hover:bg-primary-soft hover:shadow-glow active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {status === "submitting" ? (
