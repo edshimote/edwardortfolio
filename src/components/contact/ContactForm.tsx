@@ -25,6 +25,7 @@ export function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
+  const [phone, setPhone] = useState("");
   const [service, setService] = useState<ServiceId | "">("");
   const [budget, setBudget] = useState("");
   const [message, setMessage] = useState("");
@@ -32,7 +33,6 @@ export function ContactForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [errorDetail, setErrorDetail] = useState<string>("");
-  const mountedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
 
   // Prefill from the Project Estimator's "Request a Custom Quote" CTA without losing anything typed.
@@ -66,7 +66,7 @@ export function ContactForm() {
       return;
     }
     // Soft anti-spam: a human takes a moment to fill a form out.
-    if (Date.now() - mountedAt.current < 1500 || honeypot.trim() !== "") {
+    if (honeypot.trim() !== "") {
       setStatus("success"); // behave normally; silently drop
       return;
     }
@@ -80,6 +80,7 @@ export function ContactForm() {
           name,
           email,
           company,
+          phone,
           service,
           budget,
           message,
@@ -101,7 +102,7 @@ export function ContactForm() {
         return;
       }
       setStatus("success");
-      setName(""); setEmail(""); setCompany(""); setService(""); setBudget(""); setMessage("");
+      setName(""); setEmail(""); setCompany(""); setPhone(""); setService(""); setBudget(""); setMessage("");
     } catch {
       setStatus("error");
       setErrorDetail(f.errorGeneric);
@@ -182,10 +183,14 @@ export function ContactForm() {
         </div>
 
         <div className="sm:col-span-2">
+          <label htmlFor="phone" className={labelCls}>WhatsApp (opcional)</label>
+          <input id="phone" type="tel" autoComplete="tel" className={inputCls} value={phone} onChange={e=>setPhone(e.target.value)} maxLength={40} placeholder="(11) 99999-9999" />
+        </div>
+        <div className="sm:col-span-2">
           <label htmlFor="budget" className={labelCls}>{f.budget}</label>
           <select id="budget" className={inputCls} value={budget} onChange={(e) => setBudget(e.target.value)}>
             <option value="">{f.budgetPlaceholder}</option>
-            {f.budgets.map((b) => <option key={b} value={b}>{b}</option>)}
+            {["Até R$ 500","R$ 501 a R$ 1.000","R$ 1.001 a R$ 2.000","R$ 2.001 a R$ 3.500","Acima de R$ 3.500","A definir"].map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
         </div>
 
