@@ -6,7 +6,9 @@ export const PROJECT_COMPLEXITIES=["Não sei / preciso de orientação","Simples
 export const PROJECT_TIMELINES=["Flexível","Prazo normal","Urgente"];
 export const PROJECT_FEATURES=["Painel administrativo","Pagamentos online","Mais de um idioma","Login de usuários","Integração com sistemas/API","Identidade visual do site","WhatsApp","Formulário de contato","SEO"];
 export type ProjectPreferences={complexity:string|null;timeline:string|null;features:string[]};
-export type CatalogSnapshot={preferences?:ProjectPreferences;version:1;items:CatalogLine[];one_time_cents:number;monthly_cents:number};
+export type Market="BR"|"US";
+export type Currency="BRL"|"USD";
+export type CatalogSnapshot={market?:Market;currency?:Currency;preferences?:ProjectPreferences;version:1;items:CatalogLine[];one_time_cents:number;monthly_cents:number};
 export const MAINTENANCE_CENTS=15000;
 export const MAINTENANCE_ID="manutencao-mensal-opcional";
 export const CATALOG:Offer[]=[
@@ -371,12 +373,381 @@ export const CATALOG:Offer[]=[
     "website": false
   }
 ];
+export const US_CATALOG:Offer[]=[
+  {
+    "id": "landing-page-basica",
+    "category": "Websites",
+    "name": "Basic landing page",
+    "price_cents": 25000,
+    "deadline": "3 business days",
+    "scope": "One page, up to 4 sections and a contact button.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "landing-page-profissional",
+    "category": "Websites",
+    "name": "Professional landing page",
+    "price_cents": 40000,
+    "deadline": "5 business days",
+    "scope": "One page, up to 7 sections, a form and WhatsApp.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "landing-page-premium",
+    "category": "Websites",
+    "name": "Premium landing page",
+    "price_cents": 55000,
+    "deadline": "7 business days",
+    "scope": "Up to 10 sections, animations and basic event tracking.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "portfolio-profissional",
+    "category": "Websites",
+    "name": "Professional portfolio",
+    "price_cents": 40000,
+    "deadline": "5 business days",
+    "scope": "Up to 4 pages and 10 projects.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "site-institucional",
+    "category": "Websites",
+    "name": "Business website",
+    "price_cents": 60000,
+    "deadline": "7 business days",
+    "scope": "Up to 3 pages, contact, map and social links.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "site-empresarial-completo",
+    "category": "Websites",
+    "name": "Complete business website",
+    "price_cents": 90000,
+    "deadline": "10 business days",
+    "scope": "Up to 5 pages, a form and basic SEO.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "site-premium-personalizado",
+    "category": "Websites",
+    "name": "Custom premium website",
+    "price_cents": 120000,
+    "deadline": "15 business days",
+    "scope": "Up to 7 pages and light animations.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "site-com-painel-administrativo",
+    "category": "Websites",
+    "name": "Website with admin dashboard",
+    "price_cents": 140000,
+    "deadline": "15 business days",
+    "scope": "Up to 5 pages and editing one content category.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "reformulacao-de-site",
+    "category": "Websites",
+    "name": "Website redesign",
+    "price_cents": 45000,
+    "deadline": "7 business days",
+    "scope": "Redesign of up to 3 pages.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "cardapio-digital-em-pdf",
+    "category": "Menus",
+    "name": "PDF digital menu",
+    "price_cents": 15000,
+    "deadline": "3 business days",
+    "scope": "Up to 4 pages and 40 items.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "cardapio-digital-profissional",
+    "category": "Menus",
+    "name": "Professional digital menu",
+    "price_cents": 30000,
+    "deadline": "5 business days",
+    "scope": "Up to 50 items, categories and QR code.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "site-institucional-com-cardapio",
+    "category": "Menus",
+    "name": "Restaurant website with menu",
+    "price_cents": 70000,
+    "deadline": "8 business days",
+    "scope": "Up to 3 pages and a 50-item menu.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "site-completo-com-sistema-de-pedidos",
+    "category": "Menus",
+    "name": "Website with ordering system",
+    "price_cents": 140000,
+    "deadline": "12 business days",
+    "scope": "Up to 50 items, cart and orders through WhatsApp.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "catalogo-digital",
+    "category": "Online stores",
+    "name": "Digital product catalog",
+    "price_cents": 35000,
+    "deadline": "5 business days",
+    "scope": "Up to 30 products, no checkout.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "loja-com-pedidos-via-whatsapp",
+    "category": "Online stores",
+    "name": "Store with WhatsApp ordering",
+    "price_cents": 70000,
+    "deadline": "8 business days",
+    "scope": "Up to 40 products, cart and orders through WhatsApp.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "loja-virtual-completa",
+    "category": "Online stores",
+    "name": "Complete online store",
+    "price_cents": 140000,
+    "deadline": "15 business days",
+    "scope": "Up to 50 products, standard checkout and dashboard.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "e-commerce-avancado",
+    "category": "Online stores",
+    "name": "Advanced e-commerce",
+    "price_cents": 220000,
+    "deadline": "20 business days",
+    "scope": "Up to 100 products, one integration and a standard dashboard.",
+    "monthly": false,
+    "website": true
+  },
+  {
+    "id": "scripts-personalizados",
+    "category": "Systems & automation",
+    "name": "Custom scripts",
+    "price_cents": 15000,
+    "deadline": "3 business days",
+    "scope": "One script for one task.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "bots-personalizados",
+    "category": "Systems & automation",
+    "name": "Custom bots",
+    "price_cents": 30000,
+    "deadline": "5 business days",
+    "scope": "One bot with up to 5 commands.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "automacao-de-processos",
+    "category": "Systems & automation",
+    "name": "Process automation",
+    "price_cents": 40000,
+    "deadline": "7 business days",
+    "scope": "One workflow, up to 3 steps and one external service.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "integracao-de-sistemas-e-apis",
+    "category": "Systems & automation",
+    "name": "Systems and API integration",
+    "price_cents": 50000,
+    "deadline": "8 business days",
+    "scope": "Two services and up to 3 operations.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "painel-administrativo",
+    "category": "Systems & automation",
+    "name": "Admin dashboard",
+    "price_cents": 85000,
+    "deadline": "10 business days",
+    "scope": "Up to 3 screens and management of one record type.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "sistema-empresarial-inicial",
+    "category": "Systems & automation",
+    "name": "Starter business system",
+    "price_cents": 250000,
+    "deadline": "25 business days",
+    "scope": "Login, up to 3 simple modules and one user role.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "integracao-com-inteligencia-artificial",
+    "category": "Systems & automation",
+    "name": "AI integration",
+    "price_cents": 85000,
+    "deadline": "10 business days",
+    "scope": "One AI API feature in an existing system.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "configuracao-de-campanhas",
+    "category": "Paid ads",
+    "name": "Campaign setup",
+    "price_cents": 20000,
+    "deadline": "3 business days",
+    "scope": "One platform and one campaign.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "meta-ads",
+    "category": "Paid ads",
+    "name": "Meta Ads management",
+    "price_cents": 40000,
+    "deadline": "30 calendar days",
+    "scope": "Up to 2 campaigns and a monthly report.",
+    "monthly": true,
+    "website": false
+  },
+  {
+    "id": "google-ads",
+    "category": "Paid ads",
+    "name": "Google Ads management",
+    "price_cents": 45000,
+    "deadline": "30 calendar days",
+    "scope": "Up to 2 campaigns and a monthly report.",
+    "monthly": true,
+    "website": false
+  },
+  {
+    "id": "meta-ads-google-ads",
+    "category": "Paid ads",
+    "name": "Meta Ads + Google Ads",
+    "price_cents": 70000,
+    "deadline": "30 calendar days",
+    "scope": "Up to 2 campaigns per platform.",
+    "monthly": true,
+    "website": false
+  },
+  {
+    "id": "gestao-avancada-de-trafego",
+    "category": "Paid ads",
+    "name": "Advanced ads management",
+    "price_cents": 100000,
+    "deadline": "30 calendar days",
+    "scope": "Up to 6 campaigns, testing and weekly monitoring.",
+    "monthly": true,
+    "website": false
+  },
+  {
+    "id": "manutencao-mensal-opcional",
+    "category": "Support",
+    "name": "Optional monthly maintenance",
+    "price_cents": 9900,
+    "deadline": "Monthly",
+    "scope": "Up to one hour of minor changes per month.",
+    "monthly": true,
+    "website": false
+  },
+  {
+    "id": "atualizacao-mensal-de-cardapio",
+    "category": "Support",
+    "name": "Monthly menu updates",
+    "price_cents": 5000,
+    "deadline": "Monthly",
+    "scope": "Up to 15 item or price updates.",
+    "monthly": true,
+    "website": false
+  },
+  {
+    "id": "pagina-adicional",
+    "category": "Support",
+    "name": "Additional page",
+    "price_cents": 12500,
+    "deadline": "3 business days",
+    "scope": "One page with up to 5 sections.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "correcoes-e-melhorias",
+    "category": "Support",
+    "name": "Fixes and improvements",
+    "price_cents": 17500,
+    "deadline": "3 business days",
+    "scope": "One support request, up to 2 hours.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "otimizacao-para-buscas-seo",
+    "category": "Support",
+    "name": "Search optimization (SEO)",
+    "price_cents": 25000,
+    "deadline": "5 business days",
+    "scope": "Technical SEO for up to 5 pages.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "otimizacao-de-desempenho",
+    "category": "Support",
+    "name": "Performance optimization",
+    "price_cents": 20000,
+    "deadline": "5 business days",
+    "scope": "Improvements for up to 5 pages.",
+    "monthly": false,
+    "website": false
+  },
+  {
+    "id": "integracoes-adicionais",
+    "category": "Support",
+    "name": "Additional integrations",
+    "price_cents": 27500,
+    "deadline": "5 business days",
+    "scope": "One simple integration.",
+    "monthly": false,
+    "website": false
+  }
+];
+export const getCatalog=(market:Market)=>market==="US"?US_CATALOG:CATALOG;
+export const currencyFor=(market:Market):Currency=>market==="US"?"USD":"BRL";
+export const maintenanceFor=(market:Market)=>market==="US"?9900:MAINTENANCE_CENTS;
+export const PROJECT_COMPLEXITIES_EN=["Not sure / need guidance","Simple","Intermediate","Advanced"];
+export const PROJECT_TIMELINES_EN=["Flexible","Standard timeline","Urgent"];
+export const PROJECT_FEATURES_EN=["Admin dashboard","Online payments","Multiple languages","User login","Systems/API integration","Website visual identity","WhatsApp","Contact form","SEO"];
 export const CATEGORIES=[...new Set(CATALOG.map(o=>o.category))];
-export const money=(cents:number)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(cents/100);
-export function catalogSnapshot(input:unknown,strict=true):CatalogSnapshot|null{
+export const money=(cents:number,currency:Currency="BRL")=>new Intl.NumberFormat(currency==="USD"?"en-US":"pt-BR",{style:"currency",currency}).format(cents/100);
+export function catalogSnapshot(input:unknown,strict=true,market:Market="BR"):CatalogSnapshot|null{
  if(!Array.isArray(input)||!input.length||input.length>CATALOG.length)return null;
+ const catalog=getCatalog(market);
  const ids=new Set<string>();const items:CatalogLine[]=[];
- for(const choice of input){if(!choice||typeof choice!=="object"||typeof choice.id!=="string"||ids.has(choice.id))return null;const o=CATALOG.find(i=>i.id===choice.id);if(!o)return null;ids.add(o.id);const m=choice.maintenance;if(o.website&&strict&&m!=="yes"&&m!=="no")return null;if(!o.website&&m!=null)return null;const maintenance=o.website&&(m==="yes"||m==="no")?m:null;items.push({...o,maintenance,maintenance_cents:maintenance==="yes"?MAINTENANCE_CENTS:0});}
+ for(const choice of input){if(!choice||typeof choice!=="object"||typeof choice.id!=="string"||ids.has(choice.id))return null;const o=catalog.find(i=>i.id===choice.id);if(!o)return null;ids.add(o.id);const m=choice.maintenance;if(o.website&&strict&&m!=="yes"&&m!=="no")return null;if(!o.website&&m!=null)return null;const maintenance=o.website&&(m==="yes"||m==="no")?m:null;items.push({...o,maintenance,maintenance_cents:maintenance==="yes"?maintenanceFor(market):0});}
  if(items.some(i=>i.website)&&ids.has(MAINTENANCE_ID))return null;
- return {version:1,items,one_time_cents:items.reduce((sum,i)=>sum+(i.monthly?0:i.price_cents),0),monthly_cents:items.reduce((sum,i)=>sum+(i.monthly?i.price_cents:0)+i.maintenance_cents,0)};
+ return {version:1,market,currency:currencyFor(market),items,one_time_cents:items.reduce((sum,i)=>sum+(i.monthly?0:i.price_cents),0),monthly_cents:items.reduce((sum,i)=>sum+(i.monthly?i.price_cents:0)+i.maintenance_cents,0)};
 }
