@@ -12,7 +12,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", displ
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: SITE_TITLE, template: "%s — Eduardo.dev" },
+  title: { default: SITE_TITLE, template: "%s — Edward Digital" },
   description: SITE_DESCRIPTION,
   keywords: [
     "full-stack developer",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     type: "website",
-    locale: "en_US",
-    alternateLocale: ["pt_BR"],
+    locale: "pt_BR",
+    alternateLocale: ["en_US"],
     url: SITE_URL,
     siteName: SITE_NAME,
   },
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+  robots: process.env.APP_MODE==="admin" ? {index:false,follow:false} : { index: true, follow: true, googleBot: { index: true, follow: true } },
 };
 export const viewport: Viewport = { themeColor: "#07090F", width: "device-width", initialScale: 1 };
 
@@ -62,14 +62,14 @@ const structuredData = {
   url: SITE_URL,
   image: `${SITE_URL}/opengraph-image`,
   priceRange: "$$",
-  areaServed: { "@type": "Country", name: "United States" },
+  areaServed: { "@type": "Country", name: "Brazil" },
   ...(CONTACT.email ? { email: CONTACT.email } : {}),
   founder: { "@type": "Person", name: "Eduardo", jobTitle: "Full-Stack Developer & Automation Specialist" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-US" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="pt-BR" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="font-sans">
         <script
           type="application/ld+json"
