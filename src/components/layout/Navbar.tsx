@@ -62,9 +62,9 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <button onClick={toggle} aria-label={t.nav.lang} className="glass inline-flex h-10 items-center gap-1.5 rounded-full px-3 font-mono text-xs text-ink-muted transition-colors hover:text-ink">
-            <Languages size={14} aria-hidden /> <span className={locale === "en" ? "text-ink" : ""}>EN</span>/<span className={locale === "pt" ? "text-ink" : ""}>PT</span>
+            <Languages size={14} aria-hidden /> <span>{locale==="pt"?"BR · BRL":"US · USD"}</span>
           </button>
-          <a href="/cliente" className="rounded-full border border-line px-3 py-2 text-xs font-medium text-ink">Área do cliente</a>
+          <a href="/cliente" className="rounded-full border border-line px-3 py-2 text-xs font-medium text-ink">{locale==="pt"?"Área do cliente":"Client area"}</a>
           <Button href="#contact" size="md" className="hidden sm:inline-flex">{t.nav.cta}</Button>
           <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? t.nav.close : t.nav.menu}
             className="glass inline-flex h-10 w-10 items-center justify-center rounded-full md:hidden">
