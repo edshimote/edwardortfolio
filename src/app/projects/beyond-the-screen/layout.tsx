@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
-import { Outfit } from "next/font/google";
-
-const outfit = Outfit({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-outfit", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Beyond the Screen — Interactive 3D Demo | Eduardo.dev",
@@ -12,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <div className={outfit.variable}>{children}</div>;
+  return <div style={{"--font-outfit":"var(--font-display), system-ui, sans-serif"} as React.CSSProperties}>{children}</div>;
 }
