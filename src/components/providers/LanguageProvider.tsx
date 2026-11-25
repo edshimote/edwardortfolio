@@ -5,12 +5,12 @@ import { dictionary, type Dictionary, type Locale } from "@/lib/i18n";
 type Ctx = { locale: Locale; t: Dictionary; toggle: () => void };
 const LanguageContext = createContext<Ctx | null>(null);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("pt");
+export function LanguageProvider({ children,initialLocale="pt" }: { children: ReactNode; initialLocale?:Locale }) {
+  const [locale, setLocale] = useState<Locale>(initialLocale);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("locale");
+      const saved = localStorage.getItem("edward-market-override");
       if (saved === "en" || saved === "pt") setLocale(saved);
     } catch {}
   }, []);
@@ -22,7 +22,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const toggle = useCallback(() => {
     setLocale((l) => {
       const next: Locale = l === "en" ? "pt" : "en";
-      try { localStorage.setItem("locale", next); } catch {}
+      try { localStorage.setItem("edward-market-override", next); document.cookie="edward-market="+next+"; Path=/; Max-Age=31536000; SameSite=Lax; Secure"; } catch {}
       return next;
     });
   }, []);
