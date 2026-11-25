@@ -2,7 +2,11 @@
 export type Offer={id:string;category:string;name:string;price_cents:number;deadline:string;scope:string;monthly:boolean;website:boolean};
 export type Selection={id:string;maintenance:"yes"|"no"|null};
 export type CatalogLine=Offer & {maintenance:"yes"|"no"|null;maintenance_cents:number};
-export type CatalogSnapshot={version:1;items:CatalogLine[];one_time_cents:number;monthly_cents:number};
+export const PROJECT_COMPLEXITIES=["Não sei / preciso de orientação","Simples","Intermediário","Avançado"];
+export const PROJECT_TIMELINES=["Flexível","Prazo normal","Urgente"];
+export const PROJECT_FEATURES=["Painel administrativo","Pagamentos online","Mais de um idioma","Login de usuários","Integração com sistemas/API","Identidade visual do site","WhatsApp","Formulário de contato","SEO"];
+export type ProjectPreferences={complexity:string|null;timeline:string|null;features:string[]};
+export type CatalogSnapshot={preferences?:ProjectPreferences;version:1;items:CatalogLine[];one_time_cents:number;monthly_cents:number};
 export const MAINTENANCE_CENTS=15000;
 export const MAINTENANCE_ID="manutencao-mensal-opcional";
 export const CATALOG:Offer[]=[
