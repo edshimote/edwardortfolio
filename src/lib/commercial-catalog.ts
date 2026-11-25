@@ -5,7 +5,7 @@ export type CatalogLine=Offer & {maintenance:"yes"|"no"|null;maintenance_cents:n
 export const PROJECT_COMPLEXITIES=["Não sei / preciso de orientação","Simples","Intermediário","Avançado"];
 export const PROJECT_TIMELINES=["Flexível","Prazo normal","Urgente"];
 export const PROJECT_FEATURES=["Painel administrativo","Pagamentos online","Mais de um idioma","Login de usuários","Integração com sistemas/API","Identidade visual do site","WhatsApp","Formulário de contato","SEO"];
-export type ProjectPreferences={complexity:string|null;timeline:string|null;features:string[]};
+export type ProjectPreferences={infrastructure?:Infrastructure;complexity:string|null;timeline:string|null;features:string[]};
 export type Market="BR"|"US";
 export type Currency="BRL"|"USD";
 export type CatalogSnapshot={market?:Market;currency?:Currency;preferences?:ProjectPreferences;version:1;items:CatalogLine[];one_time_cents:number;monthly_cents:number};
@@ -750,4 +750,17 @@ export function catalogSnapshot(input:unknown,strict=true,market:Market="BR"):Ca
  for(const choice of input){if(!choice||typeof choice!=="object"||typeof choice.id!=="string"||ids.has(choice.id))return null;const o=catalog.find(i=>i.id===choice.id);if(!o)return null;ids.add(o.id);const m=choice.maintenance;if(o.website&&strict&&m!=="yes"&&m!=="no")return null;if(!o.website&&m!=null)return null;const maintenance=o.website&&(m==="yes"||m==="no")?m:null;items.push({...o,maintenance,maintenance_cents:maintenance==="yes"?maintenanceFor(market):0});}
  if(items.some(i=>i.website)&&ids.has(MAINTENANCE_ID))return null;
  return {version:1,market,currency:currencyFor(market),items,one_time_cents:items.reduce((sum,i)=>sum+(i.monthly?0:i.price_cents),0),monthly_cents:items.reduce((sum,i)=>sum+(i.monthly?i.price_cents:0)+i.maintenance_cents,0)};
+}
+
+export const INFRA_OPTIONS={
+ hosting:[["existing","Já tenho hospedagem","I already have hosting"],["self","Vou contratar e pagar diretamente","I will purchase and pay directly"],["assisted","Quero ajuda para escolher e configurar","I need help choosing and configuring hosting"],["undecided","Preciso de orientação","I need guidance"],["not_applicable","Não se aplica","Not applicable"]],
+ domain:[["existing","Já tenho domínio","I already have a domain"],["new","Quero registrar um domínio próprio","I want to register a custom domain"],["subdomain","Subdomínio, se compatível com o projeto","Subdomain, if suitable for the project"],["undecided","Preciso de orientação","I need guidance"],["not_applicable","Não se aplica","Not applicable"]],
+ extras:[["email","E-mail profissional","Business email"],["database","Banco de dados / armazenamento","Database / storage"],["api","APIs e integrações pagas","Paid APIs and integrations"],["licenses","Licenças e ferramentas","Licenses and tools"],["ads","Verba de anúncios","Advertising budget"]]
+} as const;
+export type Infrastructure={hosting:string;domain:string;extras:string[];acknowledged:true};
+export function infrastructureLabel(kind:keyof typeof INFRA_OPTIONS,value:string,en=false){return INFRA_OPTIONS[kind].find(o=>o[0]===value)?.[en?2:1]??value;}
+export function validInfrastructure(input:unknown,website:boolean):input is Infrastructure{
+ if(!input||typeof input!=="object")return false;
+ const x=input as Partial<Infrastructure>;
+ return x.acknowledged===true&&INFRA_OPTIONS.hosting.some(o=>o[0]===x.hosting)&&INFRA_OPTIONS.domain.some(o=>o[0]===x.domain)&&(!website||(x.hosting!=="not_applicable"&&x.domain!=="not_applicable"))&&Array.isArray(x.extras)&&x.extras.length<=INFRA_OPTIONS.extras.length&&new Set(x.extras).size===x.extras.length&&x.extras.every(v=>INFRA_OPTIONS.extras.some(o=>o[0]===v));
 }
