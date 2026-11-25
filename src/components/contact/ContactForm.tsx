@@ -7,7 +7,7 @@ import {
   CONTACT,
   contactHref,
 } from "@/lib/contact";
-import { catalogSnapshot,money,currencyFor,PROJECT_COMPLEXITIES,PROJECT_TIMELINES,PROJECT_FEATURES,PROJECT_COMPLEXITIES_EN,PROJECT_TIMELINES_EN,PROJECT_FEATURES_EN,type Selection,type Market } from "@/lib/commercial-catalog";
+import { catalogSnapshot,money,currencyFor,INFRA_OPTIONS,validInfrastructure,PROJECT_COMPLEXITIES,PROJECT_TIMELINES,PROJECT_FEATURES,PROJECT_COMPLEXITIES_EN,PROJECT_TIMELINES_EN,PROJECT_FEATURES_EN,type Selection,type Market } from "@/lib/commercial-catalog";
 import { ContactButtons } from "./ContactButtons";
 
 type Status = "idle" | "submitting" | "success" | "error" | "unconfigured";
@@ -26,6 +26,9 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
   const [account, setAccount] = useState("");
   useEffect(() => { fetch("/api/session", {cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(d?.email){setAccount(d.email);setEmail(d.email);}}).catch(()=>{}); }, []);
   const snapshot=catalogSnapshot(selection,true,market);
+  const website=!!snapshot?.items.some(o=>o.website);
+  const [hosting,setHosting]=useState("");const [domain,setDomain]=useState("");const [extras,setExtras]=useState<string[]>([]);const [acknowledged,setAcknowledged]=useState(false);
+  const infrastructure={hosting,domain,extras,acknowledged};const infraValid=validInfrastructure(infrastructure,website);
   const [budget, setBudget] = useState("");
   useEffect(()=>{setBudget("");},[market]);
   const [complexity,setComplexity]=useState("");
@@ -51,6 +54,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
     e.preventDefault();
     if (!account) { setStatus("error"); setErrorDetail(tr("Entre na sua conta para enviar e acompanhar o orçamento.","Sign in to submit and track your quote.")); return; }
     if(!snapshot){setStatus("error");setErrorDetail(tr("Selecione pelo menos um serviço no catálogo e responda à manutenção de cada site.","Select at least one service and choose maintenance for each website."));return;}
+    if(!infraValid){setStatus("error");setErrorDetail(tr("Escolha hospedagem e domínio e confirme os custos externos.","Choose hosting and domain options and acknowledge external costs."));return;}
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -77,7 +81,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
           market,
           service:"Catálogo comercial",
           catalogSelections:selection,
-          catalogPreferences:{complexity:complexity||null,timeline:timeline||null,features},
+          catalogPreferences:{complexity:complexity||null,timeline:timeline||null,features,infrastructure},
           budget,
           message,
           company_website: honeypot,
@@ -101,7 +105,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
       await res.json();
       onSent();
       setStatus("success");
-      setName(""); setEmail(account); setCompany(""); setPhone(""); setBudget(""); setMessage(""); setComplexity("");setTimeline("");setFeatures([]);
+      setName(""); setEmail(account); setCompany(""); setPhone(""); setBudget(""); setMessage(""); setComplexity("");setTimeline("");setFeatures([]);setHosting("");setDomain("");setExtras([]);setAcknowledged(false);
     } catch {
       setStatus("error");
       setErrorDetail(f.errorGeneric);
@@ -188,6 +192,17 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
         <div><label htmlFor="complexity" className={labelCls}>{tr("Complexidade desejada (opcional)","Project complexity (optional)")}</label><select id="complexity" className={inputCls} value={complexity} onChange={e=>setComplexity(e.target.value)}><option value="">{tr("Selecione","Select")}</option>{PROJECT_COMPLEXITIES.map((v,i)=><option key={v} value={v}>{en?PROJECT_COMPLEXITIES_EN[i]:v}</option>)}</select></div>
         <div><label htmlFor="timeline" className={labelCls}>{tr("Preferência de prazo (opcional)","Preferred timeline (optional)")}</label><select id="timeline" className={inputCls} value={timeline} onChange={e=>setTimeline(e.target.value)}><option value="">{tr("Selecione","Select")}</option>{PROJECT_TIMELINES.map((v,i)=><option key={v} value={v}>{en?PROJECT_TIMELINES_EN[i]:v}</option>)}</select></div>
         <fieldset className="space-y-3 rounded-xl border border-line p-4 sm:col-span-2"><legend className="text-sm font-semibold">{tr("Recursos desejados (opcional)","Requested features (optional)")}</legend><p className="text-xs text-ink-muted">{tr("Indique o que você precisa. Recursos fora do escopo escolhido serão avaliados no orçamento; marcar aqui não adiciona preço automaticamente.","Select the features you need. Anything outside the selected scope will be quoted separately; these choices do not automatically add a charge.")}</p><div className="grid gap-2 sm:grid-cols-2">{PROJECT_FEATURES.map((v,i)=><label key={v} className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-violet-500" checked={features.includes(v)} onChange={()=>setFeatures(prev=>prev.includes(v)?prev.filter(x=>x!==v):[...prev,v])}/>{en?PROJECT_FEATURES_EN[i]:v}</label>)}</div></fieldset>
+        <fieldset className="space-y-4 rounded-xl border border-line p-4 sm:col-span-2">
+          <legend className="text-sm font-semibold">{tr("Hospedagem, domínio e custos externos","Hosting, domain and external costs")}</legend>
+          <p className="text-sm text-ink-muted">{tr("Os valores do catálogo cobrem os serviços da Edward Digital. Hospedagem, domínio, licenças, APIs, armazenamento e anúncios são cobrados separadamente pelos fornecedores. A manutenção mensal não inclui esses custos. A contratação será combinada antes de qualquer cobrança.","Catalog prices cover Edward Digital services. Hosting, domains, licenses, APIs, storage and ads are charged separately by providers. Monthly maintenance does not include these costs. Purchases will be agreed before any charge.")}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+          <div><label htmlFor="hosting" className={labelCls}>{tr("Hospedagem (obrigatório)","Hosting (required)")}</label><select id="hosting" required className={inputCls} value={hosting} onChange={e=>setHosting(e.target.value)}><option value="">{tr("Selecione","Select")}</option>{INFRA_OPTIONS.hosting.filter(o=>!website||o[0]!=="not_applicable").map(o=><option key={o[0]} value={o[0]}>{o[en?2:1]}</option>)}</select></div>
+          <div><label htmlFor="domain" className={labelCls}>{tr("Domínio (obrigatório)","Domain (required)")}</label><select id="domain" required className={inputCls} value={domain} onChange={e=>setDomain(e.target.value)}><option value="">{tr("Selecione","Select")}</option>{INFRA_OPTIONS.domain.filter(o=>!website||o[0]!=="not_applicable").map(o=><option key={o[0]} value={o[0]}>{o[en?2:1]}</option>)}</select></div></div>
+          <p className="text-xs text-ink-muted">{tr("Se precisar de hospedagem, recomendamos um plano compatível com uso comercial. Os preços de hospedagem e de renovação do domínio serão confirmados no atendimento; não há contratação automática.","If hosting is needed, we recommend a plan that allows commercial use. Hosting and domain renewal costs will be confirmed during consultation; no automatic purchase.")}</p>
+          <p className="text-sm font-medium">{tr("Outros serviços externos (opcional)","Other external services (optional)")}</p>
+          <div className="grid gap-2 sm:grid-cols-2">{INFRA_OPTIONS.extras.map(o=><label key={o[0]} className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1 accent-violet-500" checked={extras.includes(o[0])} onChange={()=>setExtras(prev=>prev.includes(o[0])?prev.filter(v=>v!==o[0]):[...prev,o[0]])}/>{o[en?2:1]}</label>)}</div>
+          <label className="flex items-start gap-2 rounded-lg border border-line p-3 text-sm"><input type="checkbox" required className="mt-1 accent-violet-500" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)}/><span>{tr("Entendo que despesas de terceiros são de minha responsabilidade, não estão incluídas no orçamento do catálogo e serão informadas antes da contratação.","I understand third-party costs are my responsibility, are not included in the catalog quote and will be disclosed before purchase.")}</span></label>
+        </fieldset>
         <div className="sm:col-span-2">
           <label htmlFor="message" className={labelCls}>{f.message}</label>
           <textarea id="message" rows={5} maxLength={4000} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)}
@@ -206,7 +221,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="submit"
-          disabled={status === "submitting" || !snapshot}
+          disabled={status === "submitting" || !snapshot || !infraValid}
           className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-7 text-[0.95rem] font-medium text-white transition-all duration-300 hover:bg-primary-soft hover:shadow-glow active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {status === "submitting" ? (
