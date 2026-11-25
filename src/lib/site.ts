@@ -4,8 +4,8 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://edwarddigital.vercel.app";
 
-export const SITE_NAME = "Edward Digital";
-export const SITE_TITLE = "Edward Digital — Sites, sistemas e automações para empresas";
+export const SITE_NAME = "Nexworthy";
+export const SITE_TITLE = "Nexworthy — Sites, sistemas e automações para empresas";
 export const SITE_DESCRIPTION =
   "Desenvolvimento de sites, cardápios digitais, lojas virtuais, sistemas e automações para empresas brasileiras.";
 

@@ -1,19 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { headers,cookies } from "next/headers";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import { CONTACT } from "@/lib/contact";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 
-const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", display: "swap" });
-const body = Inter({ subsets: ["latin"], variable: "--font-body", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: SITE_TITLE, template: "%s — Edward Digital" },
+  title: { default: SITE_TITLE, template: "%s — Nexworthy" },
   description: SITE_DESCRIPTION,
   keywords: [
     "full-stack developer",
@@ -71,7 +67,7 @@ const structuredData = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const h=await headers();const c=await cookies();const saved=c.get("edward-market")?.value;const country=h.get("x-vercel-ip-country");const locale=process.env.APP_MODE==="admin"?"pt":saved==="pt"||saved==="en"?saved:country?country==="BR"?"pt":"en":(h.get("accept-language")||"pt").toLowerCase().startsWith("pt")?"pt":"en";
   return (
-    <html lang={locale==="pt"?"pt-BR":"en-US"} className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang={locale==="pt"?"pt-BR":"en-US"}>
       <body className="font-sans">
         <script
           type="application/ld+json"

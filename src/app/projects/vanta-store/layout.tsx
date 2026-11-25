@@ -5,7 +5,7 @@ import { Manrope } from "next/font/google";
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Vanta Store — Concept Project | Eduardo.dev",
+  title: "Vanta Store — Concept Project | Nexworthy",
   description: "Concept e-commerce storefront for a fictional minimalist brand, created for portfolio demonstration. Not a real store.",
   alternates: { canonical: `${SITE_URL}/projects/vanta-store` },
   robots: { index: false, follow: true },

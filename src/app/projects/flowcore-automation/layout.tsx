@@ -5,7 +5,7 @@ import { Sora } from "next/font/google";
 const sora = Sora({ subsets: ["latin"], variable: "--font-sora", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "FlowCore Automation — Interactive Demo | Eduardo.dev",
+  title: "FlowCore Automation — Interactive Demo | Nexworthy",
   description: "Interactive demo of a workflow-automation dashboard concept, created for portfolio demonstration. Not a real product.",
   alternates: { canonical: `${SITE_URL}/projects/flowcore-automation` },
   robots: { index: false, follow: true },

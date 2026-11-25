@@ -2,12 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face { font-family: Inter; src: url("/nexworthy/inter.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 :root {
-  --bg: #07090f;
-  --surface: #101420;
-  --elevated: #171d2b;
-  --primary: #7958ff;
-  --secondary: #00d9ff;
+  --font-display: Inter; --font-body: Inter; --font-mono: ui-monospace;
+  --bg: #0a0a0f;
+  --surface: #141119;
+  --elevated: #1e1b2e;
+  --primary: #7c3aed;
+  --secondary: #bd97ff;
   --ink: #f8fafc;
   --ink-muted: #94a3b8;
   --line: rgba(255, 255, 255, 0.08);
@@ -37,4 +39,17 @@ section[id] { scroll-margin-top: var(--nav-h); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+body:has(.nx-portal) {
+  background: radial-gradient(ellipse at 15% 20%, #211134, #0a0a0f 60%);
+}
+.nx-portal > header {
+  border-bottom: 1px solid #392e46;
+  padding: 1rem 0 1.5rem;
+}
+.nx-portal .glass {
+  background: linear-gradient(145deg, #201a29, #131117);
+  border-color: #372e42;
+  box-shadow: 0 12px 40px #08050d38;
 }

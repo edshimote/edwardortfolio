@@ -43,7 +43,7 @@ export function Navbar() {
     <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-line bg-bg/70 backdrop-blur-xl" : "border-b border-transparent"}`}>
       <nav aria-label="Primary" className="container-x flex h-[72px] items-center justify-between">
         <a href="#home" className="font-display text-lg font-semibold tracking-tight" onClick={() => setOpen(false)}>
-          EDWARD<span className="text-secondary">.</span>DIGITAL
+          nex<span className="text-secondary">worthy</span>
         </a>
 
         <ul className="hidden items-center gap-1 md:flex">

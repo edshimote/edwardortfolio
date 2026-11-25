@@ -5,7 +5,7 @@ import { Playfair_Display } from "next/font/google";
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Northstar Barber Studio — Concept Project | Eduardo.dev",
+  title: "Northstar Barber Studio — Concept Project | Nexworthy",
   description: "Concept website for a premium barber studio, created for portfolio demonstration. Not a real business.",
   alternates: { canonical: `${SITE_URL}/projects/northstar-barber` },
   robots: { index: false, follow: true },

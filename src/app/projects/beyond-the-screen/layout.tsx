@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Beyond the Screen — Interactive 3D Demo | Eduardo.dev",
+  title: "Beyond the Screen — Interactive 3D Demo | Nexworthy",
   description: "Interactive GLB/GLTF 3D viewer concept built with Three.js and React Three Fiber, created for portfolio demonstration. Not a real product.",
   alternates: { canonical: `${SITE_URL}/projects/beyond-the-screen` },
   robots: { index: false, follow: true },

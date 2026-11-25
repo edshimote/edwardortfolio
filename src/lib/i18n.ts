@@ -280,8 +280,8 @@ const en = {
     title: "Developer Terminal.",
     subtitle: "Explore My World Through Code.",
     desc: "A real command-line interface into this portfolio. Type a command or tap one below.",
-    windowTitle: "guest@eduardo.dev — zsh",
-    prompt: "guest@eduardo.dev",
+    windowTitle: "guest@Nexworthy — zsh",
+    prompt: "guest@Nexworthy",
     inputLabel: "Terminal command input",
     inputPlaceholder: "Type a command… try 'help'",
     quickLabel: "Quick commands",
@@ -321,7 +321,7 @@ const en = {
     whoami: {
       intro: "whoami",
       lines: [
-        "guest@eduardo.dev",
+        "guest@Nexworthy",
         "role: Full-Stack Developer · Automation Specialist",
         "status: turning ideas into shipped products",
       ],
@@ -747,8 +747,8 @@ const pt: Dictionary = {
     title: "Developer Terminal.",
     subtitle: "Explore Meu Mundo Através do Código.",
     desc: "Uma interface de linha de comando real dentro deste portfólio. Digite um comando ou toque em um abaixo.",
-    windowTitle: "guest@eduardo.dev — zsh",
-    prompt: "guest@eduardo.dev",
+    windowTitle: "guest@Nexworthy — zsh",
+    prompt: "guest@Nexworthy",
     inputLabel: "Campo de comando do terminal",
     inputPlaceholder: "Digite um comando… tente 'help'",
     quickLabel: "Comandos rápidos",
@@ -788,7 +788,7 @@ const pt: Dictionary = {
     whoami: {
       intro: "whoami",
       lines: [
-        "guest@eduardo.dev",
+        "guest@Nexworthy",
         "função: Desenvolvedor Full-Stack · Especialista em Automação",
         "status: transformando ideias em produtos entregues",
       ],

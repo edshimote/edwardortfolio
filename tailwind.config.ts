@@ -6,11 +6,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#07090F",
-        surface: "#101420",
-        elevated: "#171D2B",
-        primary: { DEFAULT: "#7958FF", soft: "#A58FFF" },
-        secondary: "#00D9FF",
+        bg: "#0a0a0f",
+        surface: "#141119",
+        elevated: "#1e1b2e",
+        primary: { DEFAULT: "#7c3aed", soft: "#A58FFF" },
+        secondary: "#bd97ff",
         ink: { DEFAULT: "#F8FAFC", muted: "#94A3B8" },
         line: "rgba(255,255,255,0.08)",
       },

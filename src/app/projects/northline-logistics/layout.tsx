@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Northline Logistics — Concept Project | Eduardo.dev",
+  title: "Northline Logistics — Concept Project | Nexworthy",
   description: "Concept website for a fictional American logistics company, created for portfolio demonstration. Not a real business.",
   alternates: { canonical: `${SITE_URL}/projects/northline-logistics` },
   robots: { index: false, follow: true },

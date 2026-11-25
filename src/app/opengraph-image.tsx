@@ -22,8 +22,8 @@ export default function OgImage() {
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        <div style={{ display: "flex", fontSize: 28, color: "#00D9FF", letterSpacing: 2, marginBottom: 24 }}>
-          EDUARDO.DEV
+        <div style={{ display: "flex", fontSize: 28, color: "#c7a2ff", letterSpacing: 2, marginBottom: 24 }}>
+          NEXWORTHY
         </div>
         <div
           style={{
@@ -35,10 +35,10 @@ export default function OgImage() {
             lineHeight: 1.15,
           }}
         >
-          Building Digital Experiences That Make an Impact.
+          Vamos construir algo incrível.
         </div>
         <div style={{ display: "flex", fontSize: 26, color: "#94A3B8", marginTop: 28, maxWidth: 820 }}>
-          Full-Stack Developer & Automation Specialist — websites, bots, automations and custom software.
+          Sites, lojas virtuais, cardápios digitais e automações.
         </div>
       </div>
     ),

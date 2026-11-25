@@ -10,7 +10,7 @@ function doPost(e) {
     var body = JSON.parse(e.postData.contents);
     if (!token || !recipient || body.webhookToken !== token) return out(false);
     var msg = ['Novo pedido de orçamento','Protocolo: '+(body.id||''),'Nome: '+body.name,'E-mail: '+body.email,'Empresa: '+(body.company||''),'WhatsApp: '+(body.phone||''),'Serviço: '+(body.service||''),'Orçamento: '+(body.budget||''),'','Mensagem:',body.message].join('\n');
-    MailApp.sendEmail({to:recipient,subject:'Novo pedido de orçamento | Edward Portfolio',body:msg,replyTo:body.email});
+    MailApp.sendEmail({to:recipient,subject:'Novo pedido de orçamento | Nexworthy',body:msg,replyTo:body.email});
     return out(true);
   } catch (err) { return out(false); }
 }

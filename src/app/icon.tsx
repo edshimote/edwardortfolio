@@ -22,11 +22,11 @@ export default function Icon() {
             display: "flex",
             fontSize: 34,
             fontWeight: 700,
-            color: "#00D9FF",
+            color: "#c7a2ff",
             fontFamily: "system-ui, sans-serif",
           }}
         >
-          E.
+          N
         </div>
       </div>
     ),

@@ -5,7 +5,7 @@ import { Space_Mono } from "next/font/google";
 const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-space-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Nexus Bot Console — Interactive Demo | Eduardo.dev",
+  title: "Nexus Bot Console — Interactive Demo | Nexworthy",
   description: "Interactive demo of a bot-management console concept, created for portfolio demonstration. Not a real product.",
   alternates: { canonical: `${SITE_URL}/projects/nexus-bot-console` },
   robots: { index: false, follow: true },
