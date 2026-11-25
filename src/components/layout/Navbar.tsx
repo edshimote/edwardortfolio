@@ -43,7 +43,7 @@ export function Navbar() {
     <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-line bg-bg/70 backdrop-blur-xl" : "border-b border-transparent"}`}>
       <nav aria-label="Primary" className="container-x flex h-[72px] items-center justify-between">
         <a href="#home" className="font-display text-lg font-semibold tracking-tight" onClick={() => setOpen(false)}>
-          EDUARDO<span className="text-secondary">.</span>DEV
+          EDWARD<span className="text-secondary">.</span>DIGITAL
         </a>
 
         <ul className="hidden items-center gap-1 md:flex">
@@ -64,6 +64,7 @@ export function Navbar() {
           <button onClick={toggle} aria-label={t.nav.lang} className="glass inline-flex h-10 items-center gap-1.5 rounded-full px-3 font-mono text-xs text-ink-muted transition-colors hover:text-ink">
             <Languages size={14} aria-hidden /> <span className={locale === "en" ? "text-ink" : ""}>EN</span>/<span className={locale === "pt" ? "text-ink" : ""}>PT</span>
           </button>
+          <a href="/cliente" className="rounded-full border border-line px-3 py-2 text-xs font-medium text-ink">Área do cliente</a>
           <Button href="#contact" size="md" className="hidden sm:inline-flex">{t.nav.cta}</Button>
           <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? t.nav.close : t.nav.menu}
             className="glass inline-flex h-10 w-10 items-center justify-center rounded-full md:hidden">
