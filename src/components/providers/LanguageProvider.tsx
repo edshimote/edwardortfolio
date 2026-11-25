@@ -6,7 +6,7 @@ type Ctx = { locale: Locale; t: Dictionary; toggle: () => void };
 const LanguageContext = createContext<Ctx | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>("pt");
 
   useEffect(() => {
     try {
