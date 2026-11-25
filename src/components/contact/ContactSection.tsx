@@ -1,4 +1,6 @@
 "use client";
+import { useEffect,useState } from "react";
+import { CATALOG,type Selection } from "@/lib/commercial-catalog";
 import { MotionConfig, motion } from "framer-motion";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { ContactButtons } from "./ContactButtons";
@@ -8,6 +10,9 @@ import { ProjectEstimator } from "./ProjectEstimator";
 export function ContactSection() {
   const { t } = useLanguage();
   const c = t.contact;
+  const [selection,setSelection]=useState<Selection[]>([]);
+  useEffect(()=>{try{const saved=JSON.parse(sessionStorage.getItem("edward-catalog")||"[]");if(Array.isArray(saved)){const seen=new Set<string>();const clean:Selection[]=[];for(const x of saved){if(!x||typeof x.id!=="string"||seen.has(x.id))continue;const o=CATALOG.find(i=>i.id===x.id);if(!o)continue;seen.add(x.id);clean.push({id:x.id,maintenance:o.website&&(x.maintenance==="yes"||x.maintenance==="no")?x.maintenance:null});}setSelection(clean);}}catch{}},[]);
+  function updateSelection(value:Selection[]){setSelection(value);try{sessionStorage.setItem("edward-catalog",JSON.stringify(value));}catch{}}
 
   return (
     <MotionConfig reducedMotion="user">
@@ -28,11 +33,11 @@ export function ContactSection() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] }} className="mt-10">
-            <ProjectEstimator />
+            <ProjectEstimator selection={selection} onChange={updateSelection}/>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }} className="mt-6 max-w-3xl">
-            <ContactForm />
+            <ContactForm selection={selection} onSent={()=>updateSelection([])}/>
           </motion.div>
         </div>
       </section>
