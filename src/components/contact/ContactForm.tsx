@@ -26,6 +26,8 @@ export function ContactForm() {
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [phone, setPhone] = useState("");
+  const [account, setAccount] = useState("");
+  useEffect(() => { fetch("/api/session", {cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(d?.email){setAccount(d.email);setEmail(d.email);}}).catch(()=>{}); }, []);
   const [service, setService] = useState<ServiceId | "">("");
   const [budget, setBudget] = useState("");
   const [message, setMessage] = useState("");
@@ -58,6 +60,7 @@ export function ContactForm() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!account) { setStatus("error"); setErrorDetail("Entre na sua conta para enviar e acompanhar o orçamento."); return; }
     const nextErrors = validate();
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -87,6 +90,7 @@ export function ContactForm() {
           company_website: honeypot,
         }),
       });
+      if (res.status === 401) { setStatus("error"); setErrorDetail("Sessão expirada. Entre novamente na área do cliente."); return; }
       if (res.status === 503) {
         setStatus("unconfigured");
         return;
@@ -102,7 +106,7 @@ export function ContactForm() {
         return;
       }
       setStatus("success");
-      setName(""); setEmail(""); setCompany(""); setPhone(""); setService(""); setBudget(""); setMessage("");
+      setName(""); setEmail(account); setCompany(""); setPhone(""); setService(""); setBudget(""); setMessage("");
     } catch {
       setStatus("error");
       setErrorDetail(f.errorGeneric);
@@ -135,7 +139,7 @@ export function ContactForm() {
     return (
       <div className="glass flex items-start gap-3 rounded-2xl p-6 sm:p-8" role="status">
         <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-emerald-400" aria-hidden />
-        <p className="text-sm text-ink">{f.success}</p>
+        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">Acompanhar meu pedido</a></div>
       </div>
     );
   }
@@ -144,6 +148,7 @@ export function ContactForm() {
     <form ref={formRef} onSubmit={onSubmit} noValidate className="glass relative rounded-2xl p-6 sm:p-8">
       <h3 className="font-display text-lg font-semibold">{f.title}</h3>
       <p className="mt-1.5 text-sm text-ink-muted">{f.subtitle}</p>
+      {!account && <p className="mt-4 rounded-lg border border-line p-3 text-sm">Para enviar e acompanhar seu orçamento, <a className="text-secondary underline" href="/cliente">entre ou crie sua conta</a>.</p>}
 
       {/* Honeypot — hidden from sighted users, never filled by humans */}
       <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
@@ -163,7 +168,7 @@ export function ContactForm() {
         </div>
         <div>
           <label htmlFor="email" className={labelCls}>{f.email}</label>
-          <input id="email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)}
+          <input id="email" type="email" className={inputCls} readOnly={Boolean(account)} value={email} onChange={(e) => setEmail(e.target.value)}
             aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-error" : undefined} autoComplete="email" />
           {errors.email && <p id="email-error" className={errorCls}>{errors.email}</p>}
         </div>
