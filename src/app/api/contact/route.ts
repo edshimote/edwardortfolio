@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONTACT, SERVICE_IDS } from "@/lib/contact";
+import { db, databaseConfigured } from "@/lib/commercial-server";
 
 // In-memory rate limit: 1 submission per IP per 30s window. Resets on redeploy/cold start —
 // acceptable as a lightweight first line of defense; not a durable store, no persistence intended.
@@ -24,6 +25,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "invalid_body" }, { status: 400 });
   }
 
+  if (!body || typeof body !== "object" || Array.isArray(body)) return NextResponse.json({ok:false,error:"invalid_body"}, {status:400});
+
   // Honeypot: a hidden field real visitors never fill. Any value here = bot.
   if (typeof body.company_website === "string" && body.company_website.trim() !== "") {
     return NextResponse.json({ ok: true }); // pretend success to the bot, do nothing
@@ -39,6 +42,7 @@ export async function POST(req: NextRequest) {
   const name = sanitize(body.name, MAX_LEN.name);
   const email = sanitize(body.email, MAX_LEN.email);
   const company = sanitize(body.company, MAX_LEN.company);
+  const phone = sanitize(body.phone, 40);
   const service = sanitize(body.service, 40);
   const budget = sanitize(body.budget, MAX_LEN.budget);
   const message = sanitize(body.message, MAX_LEN.message);
@@ -54,42 +58,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "invalid_service" }, { status: 400 });
   }
 
-  // No form provider configured on the server: do NOT fake a success response.
-  // Set CONTACT_FORM_WEBHOOK_URL (any endpoint accepting a JSON POST — e.g. a Formspree/Make/n8n
-  // webhook) in the server environment to enable real delivery. Credentials stay server-side only.
-  const webhookUrl = process.env.CONTACT_FORM_WEBHOOK_URL;
-  if (!webhookUrl) {
-    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
-  }
-
+  if (!databaseConfigured()) return NextResponse.json({ok:false,error:"not_configured"}, {status:503});
+  const lead = {name,email,company:company||null,phone:phone||null,service:service||null,budget:budget||null,message:estimatorSummary ? (message+"\n"+estimatorSummary).slice(0,4000) : message};
+  let id: string;
   try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(process.env.CONTACT_FORM_WEBHOOK_TOKEN
-          ? { Authorization: `Bearer ${process.env.CONTACT_FORM_WEBHOOK_TOKEN}` }
-          : {}),
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        company: company || null,
-        service: service || null,
-        budget: budget || null,
-        message,
-        estimatorSummary: estimatorSummary || null,
-        source: "eduardo.dev contact form",
-        ownerEmail: CONTACT.email,
-      }),
-    });
-    if (!res.ok) {
-      return NextResponse.json({ ok: false, error: "provider_error" }, { status: 502 });
-    }
+    const rows = await db("?select=id", { method:"POST", headers:{Prefer:"return=representation"}, body:JSON.stringify(lead) });
+    id = rows[0].id;
   } catch {
-    return NextResponse.json({ ok: false, error: "provider_error" }, { status: 502 });
+    return NextResponse.json({ok:false,error:"database_error"}, {status:502});
   }
-
   lastSubmission.set(ip, now);
-  return NextResponse.json({ ok: true });
+  if (lastSubmission.size > 10000) for (const [key, ts] of lastSubmission) if (now-ts >= WINDOW_MS) lastSubmission.delete(key);
+  const webhookUrl = process.env.CONTACT_FORM_WEBHOOK_URL;
+  const webhookToken = process.env.CONTACT_FORM_WEBHOOK_TOKEN;
+  if (webhookUrl && webhookToken) {
+    try {
+      const res = await fetch(webhookUrl, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...lead,id,webhookToken,ownerEmail:CONTACT.email}),signal:AbortSignal.timeout(10000)});
+      const result = await res.json();
+      if (res.ok && result.ok === true) await db("?id=eq."+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({notified:true})});
+    } catch { /* Lead is safely persisted; notification may be retried from admin. */ }
+  }
+  return NextResponse.json({ok:true,id});
 }
