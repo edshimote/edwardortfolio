@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { headers,cookies } from "next/headers";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
@@ -62,14 +63,15 @@ const structuredData = {
   url: SITE_URL,
   image: `${SITE_URL}/opengraph-image`,
   priceRange: "$$",
-  areaServed: { "@type": "Country", name: "Brazil" },
+  areaServed: [{ "@type": "Country", name: "Brazil" }, { "@type": "Country", name: "United States" }],
   ...(CONTACT.email ? { email: CONTACT.email } : {}),
   founder: { "@type": "Person", name: "Eduardo", jobTitle: "Full-Stack Developer & Automation Specialist" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const h=await headers();const c=await cookies();const saved=c.get("edward-market")?.value;const country=h.get("x-vercel-ip-country");const locale=process.env.APP_MODE==="admin"?"pt":saved==="pt"||saved==="en"?saved:country?country==="BR"?"pt":"en":(h.get("accept-language")||"pt").toLowerCase().startsWith("pt")?"pt":"en";
   return (
-    <html lang="pt-BR" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang={locale==="pt"?"pt-BR":"en-US"} className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="font-sans">
         <script
           type="application/ld+json"
@@ -84,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             strategy="afterInteractive"
           />
         )}
-        <LanguageProvider>
+        <LanguageProvider initialLocale={locale}>
           <a href="#home" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-primary focus:px-4 focus:py-2">Skip to content</a>
           {children}
         </LanguageProvider>
