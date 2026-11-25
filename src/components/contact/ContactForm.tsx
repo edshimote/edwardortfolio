@@ -7,7 +7,7 @@ import {
   CONTACT,
   contactHref,
 } from "@/lib/contact";
-import { catalogSnapshot,money,type Selection } from "@/lib/commercial-catalog";
+import { catalogSnapshot,money,PROJECT_COMPLEXITIES,PROJECT_TIMELINES,PROJECT_FEATURES,type Selection } from "@/lib/commercial-catalog";
 import { ContactButtons } from "./ContactButtons";
 
 type Status = "idle" | "submitting" | "success" | "error" | "unconfigured";
@@ -27,6 +27,9 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
   useEffect(() => { fetch("/api/session", {cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{if(d?.email){setAccount(d.email);setEmail(d.email);}}).catch(()=>{}); }, []);
   const snapshot=catalogSnapshot(selection);
   const [budget, setBudget] = useState("");
+  const [complexity,setComplexity]=useState("");
+  const [timeline,setTimeline]=useState("");
+  const [features,setFeatures]=useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [errors, setErrors] = useState<Errors>({});
@@ -72,6 +75,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
           phone,
           service:"Catálogo comercial",
           catalogSelections:selection,
+          catalogPreferences:{complexity:complexity||null,timeline:timeline||null,features},
           budget,
           message,
           company_website: honeypot,
@@ -95,7 +99,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
       await res.json();
       onSent();
       setStatus("success");
-      setName(""); setEmail(account); setCompany(""); setPhone(""); setBudget(""); setMessage("");
+      setName(""); setEmail(account); setCompany(""); setPhone(""); setBudget(""); setMessage(""); setComplexity("");setTimeline("");setFeatures([]);
     } catch {
       setStatus("error");
       setErrorDetail(f.errorGeneric);
@@ -128,7 +132,7 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
     return (
       <div className="glass flex items-start gap-3 rounded-2xl p-6 sm:p-8" role="status">
         <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-emerald-400" aria-hidden />
-        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">Abrir meu chat e acompanhar pedido</a></div>
+        <div><p className="text-sm text-ink">{f.success}</p><a href="/cliente" className="mt-2 block text-sm text-secondary">Abrir meu chat e acompanhar pedido</a><button type="button" className="mt-2 block text-sm underline" onClick={()=>setStatus("idle")}>Fazer novo pedido</button></div>
       </div>
     );
   }
@@ -179,6 +183,9 @@ export function ContactForm({selection,onSent}:{selection:Selection[];onSent:()=
           </select>
         </div>
 
+        <div><label htmlFor="complexity" className={labelCls}>Complexidade desejada (opcional)</label><select id="complexity" className={inputCls} value={complexity} onChange={e=>setComplexity(e.target.value)}><option value="">Selecione</option>{PROJECT_COMPLEXITIES.map(v=><option key={v}>{v}</option>)}</select></div>
+        <div><label htmlFor="timeline" className={labelCls}>Preferência de prazo (opcional)</label><select id="timeline" className={inputCls} value={timeline} onChange={e=>setTimeline(e.target.value)}><option value="">Selecione</option>{PROJECT_TIMELINES.map(v=><option key={v}>{v}</option>)}</select></div>
+        <fieldset className="space-y-3 rounded-xl border border-line p-4 sm:col-span-2"><legend className="text-sm font-semibold">Recursos desejados (opcional)</legend><p className="text-xs text-ink-muted">Indique o que você precisa. Recursos fora do escopo escolhido serão avaliados no orçamento; marcar aqui não adiciona preço automaticamente.</p><div className="grid gap-2 sm:grid-cols-2">{PROJECT_FEATURES.map(v=><label key={v} className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-violet-500" checked={features.includes(v)} onChange={()=>setFeatures(prev=>prev.includes(v)?prev.filter(x=>x!==v):[...prev,v])}/>{v}</label>)}</div></fieldset>
         <div className="sm:col-span-2">
           <label htmlFor="message" className={labelCls}>{f.message}</label>
           <textarea id="message" rows={5} maxLength={4000} className={`${inputCls} resize-y`} value={message} onChange={(e) => setMessage(e.target.value)}
